@@ -14,14 +14,12 @@ export default function JobList() {
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
 
   const fetchJobs = async () => {
     try {
       const response = await jobService.getJobs(page, 10);
       setJobs(response.jobs);
       setTotalPages(response.pages);
-      setTotal(response.total);
       setLoading(false);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to fetch jobs');
@@ -102,38 +100,46 @@ export default function JobList() {
   }
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-start justify-between space-y-0">
-        <div>
-          <CardTitle className="text-2xl">Jobs</CardTitle>
-          <CardDescription>
-            {total} total job{total !== 1 ? 's' : ''}
-            {loading && <span className="text-yellow-500 ml-2">(updating...)</span>}
+    <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl shadow-primary/5">
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-8">
+        <div className="space-y-1.5">
+          <CardTitle className="text-3xl font-black tracking-tighter">Jobs</CardTitle>
+          <CardDescription className="text-base font-medium">
+            Manage and monitor your distributed tasks
+            {loading && <span className="text-primary animate-pulse ml-2 font-bold inline-block">• Synchronizing...</span>}
           </CardDescription>
         </div>
         <Link to="/submit">
-          <Button>+ Submit New Job</Button>
+          <Button size="lg" className="font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform active:scale-95">
+            + Submit New Job
+          </Button>
         </Link>
       </CardHeader>
 
       <CardContent>
         {jobs.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-lg text-muted-foreground mb-4">No jobs yet</p>
+          <div className="text-center py-24 border-2 border-dashed border-border/40 rounded-3xl bg-muted/10">
+            <div className="mb-6 text-4xl">🚀</div>
+            <h3 className="text-xl font-bold mb-2">Ready to fly?</h3>
+            <p className="text-muted-foreground mb-8 max-w-[400px] mx-auto">
+              Your task execution queue is waiting for its first payload. Submit a job to see the engine in action.
+            </p>
             <Link to="/submit">
-              <Button>Submit Your First Job</Button>
+              <Button size="lg" variant="outline" className="border-primary/20 hover:bg-primary/10">
+                Launch First Job
+              </Button>
             </Link>
           </div>
         ) : (
-          <>
+          <div className="rounded-2xl border border-border/40 bg-background overflow-hidden shadow-inner shadow-muted/5">
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Job ID</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Execution Time</TableHead>
-                  <TableHead>Result</TableHead>
+              <TableHeader className="bg-muted/30">
+                <TableRow className="hover:bg-transparent border-b border-border/30">
+                  <TableHead className="py-5 pl-6 font-bold uppercase tracking-wider text-[10px]">Status</TableHead>
+                  <TableHead className="py-5 font-bold uppercase tracking-wider text-[10px]">Job Identity</TableHead>
+                  <TableHead className="py-5 font-bold uppercase tracking-wider text-[10px]">Timeline</TableHead>
+                  <TableHead className="py-5 font-bold uppercase tracking-wider text-[10px]">Runtime</TableHead>
+                  <TableHead className="py-5 pr-6 font-bold uppercase tracking-wider text-[10px]">Execution Result</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -141,54 +147,78 @@ export default function JobList() {
                   <TableRow
                     key={job.id}
                     onClick={() => navigate(`/job/${job.id}`)}
-                    className="cursor-pointer"
+                    className="group cursor-pointer hover:bg-muted/20 transition-all duration-200 border-b border-border/20 last:border-0"
                   >
-                    <TableCell>
-                      <Badge variant={getStatusVariant(job.status) as any}>
-                        {getStatusIcon(job.status)} {job.status}
+                    <TableCell className="py-5 pl-6">
+                      <Badge variant={getStatusVariant(job.status) as any} className="px-3 py-1 font-bold tracking-tight rounded-lg shadow-sm">
+                        <span className="mr-1.5">{getStatusIcon(job.status)}</span>
+                        {job.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="font-mono text-sm text-muted-foreground">
-                      {job.id?.slice(0, 8) || 'N/A'}...
+                    <TableCell className="py-5">
+                      <div className="flex flex-col">
+                        <span className="font-mono text-xs font-bold text-foreground tracking-tighter">
+                          {job.id?.slice(0, 12)}...
+                        </span>
+                        <span className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-0.5 opacity-50">
+                          UUID TAG
+                        </span>
+                      </div>
                     </TableCell>
-                    <TableCell>{formatTime(job.createdAt)}</TableCell>
-                    <TableCell>
-                      {job.executionTime ? `${job.executionTime}ms` : '-'}
+                    <TableCell className="py-5 text-sm font-medium">
+                      {formatTime(job.createdAt)}
                     </TableCell>
-                    <TableCell className="max-w-xs truncate text-muted-foreground text-sm">
-                      {job.status === 'COMPLETED' && job.result !== undefined
-                        ? JSON.stringify(job.result).slice(0, 50)
-                        : job.status === 'FAILED'
-                          ? job.error?.slice(0, 50)
-                          : '-'}
+                    <TableCell className="py-5">
+                      {job.executionTime ? (
+                        <span className="font-mono text-xs bg-primary/5 text-primary px-2 py-0.5 rounded-md border border-primary/10 font-bold">
+                          {job.executionTime}ms
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground/30 font-black">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="py-5 pr-6">
+                      <div className="max-w-[240px] truncate text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors italic opacity-70 group-hover:opacity-100 italic">
+                        {job.status === 'COMPLETED' && job.result !== undefined
+                          ? JSON.stringify(job.result).slice(0, 80)
+                          : job.status === 'FAILED'
+                            ? job.error?.slice(0, 80)
+                            : <span className="animate-pulse">Processing stream...</span>}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
+          </div>
+        )}
 
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-4 mt-6">
-                <Button
-                  onClick={() => setPage(page - 1)}
-                  disabled={page === 1}
-                  variant="outline"
-                >
-                  ← Previous
-                </Button>
-                <span className="text-sm text-muted-foreground font-medium">
-                  Page {page} of {totalPages}
-                </span>
-                <Button
-                  onClick={() => setPage(page + 1)}
-                  disabled={page === totalPages}
-                  variant="outline"
-                >
-                  Next →
-                </Button>
-              </div>
-            )}
-          </>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-8 border-t border-border/20 pt-6">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+              Showing page <span className="text-foreground">{page}</span> of <span className="text-foreground">{totalPages}</span>
+            </p>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
+                variant="outline"
+                size="sm"
+                className="rounded-xl px-5 border-border/40"
+              >
+                ← Prev
+              </Button>
+              <Button
+                onClick={() => setPage(page + 1)}
+                disabled={page === totalPages}
+                variant="outline"
+                size="sm"
+                className="rounded-xl px-5 border-border/40"
+              >
+                Next →
+              </Button>
+            </div>
+          </div>
         )}
       </CardContent>
     </Card>

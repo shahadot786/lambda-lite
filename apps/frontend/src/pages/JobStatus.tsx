@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import LogViewer from '../components/LogViewer';
 import { jobService, Job } from '../services/api';
 import { websocketService } from '../services/websocket';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -92,134 +92,143 @@ export default function JobStatus() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <CardTitle>Job Details</CardTitle>
-                <Badge variant={getStatusVariant(job.status) as any} className="text-sm">
-                  {getStatusIcon(job.status)} {job.status}
-                </Badge>
-              </div>
-              <CardDescription className="font-mono text-xs">
-                ID: {job.id}
-              </CardDescription>
-            </div>
-            <div className="flex gap-2">
-              <Link to="/">
-                <Button variant="outline">← All Jobs</Button>
-              </Link>
-              <Link to="/submit">
-                <Button>Submit New Job</Button>
-              </Link>
-            </div>
+    <div className="space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
+      {/* Header & Quick Stats */}
+      <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
+        <div className="space-y-2">
+          <div className="flex items-center gap-4">
+            <h1 className="text-4xl font-black tracking-tighter uppercase transition-all">Job Status</h1>
+            <Badge variant={getStatusVariant(job.status) as any} className="px-4 py-1.5 text-xs font-black uppercase tracking-widest rounded-xl shadow-lg shadow-primary/10">
+              <span className="mr-2 text-lg">{getStatusIcon(job.status) as any}</span>
+              {job.status}
+            </Badge>
           </div>
-        </CardHeader>
-      </Card>
+          <p className="text-sm font-mono text-muted-foreground/60 font-bold bg-muted/30 px-3 py-1 rounded-lg inline-block border border-border/20">
+            UUID: {job.id}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link to="/">
+            <Button variant="outline" className="font-bold rounded-xl border-border/40 hover:bg-muted/50">
+              ← BACK TO QUEUE
+            </Button>
+          </Link>
+          <Link to="/submit" className="hidden sm:block">
+            <Button className="font-bold rounded-xl shadow-lg shadow-primary/20">
+              SUBMIT ANOTHER
+            </Button>
+          </Link>
+        </div>
+      </div>
 
-      {/* Metadata */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Metadata</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <dl className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <dt className="font-medium text-muted-foreground">Created</dt>
-              <dd className="mt-1">{new Date(job.createdAt).toLocaleString()}</dd>
-            </div>
-            {job.startedAt && (
-              <div>
-                <dt className="font-medium text-muted-foreground">Started</dt>
-                <dd className="mt-1">{new Date(job.startedAt).toLocaleString()}</dd>
-              </div>
-            )}
-            {job.completedAt && (
-              <div>
-                <dt className="font-medium text-muted-foreground">Completed</dt>
-                <dd className="mt-1">{new Date(job.completedAt).toLocaleString()}</dd>
-              </div>
-            )}
-            {job.executionTime && (
-              <div>
-                <dt className="font-medium text-muted-foreground">Execution Time</dt>
-                <dd className="mt-1 font-mono">{job.executionTime}ms</dd>
-              </div>
-            )}
-          </dl>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Left Column - Code & Logs (8 cols) */}
+        <div className="lg:col-span-8 space-y-8">
+          {/* Result / Error Notification */}
+          {job.status === 'COMPLETED' && job.result !== undefined && (
+            <Card className="border-green-500/20 bg-green-500/5 backdrop-blur-sm shadow-xl shadow-green-500/5 animate-in zoom-in-95 duration-300">
+              <CardHeader className="pb-3 border-b border-green-500/10">
+                <CardTitle className="text-lg font-black text-green-500 tracking-widest uppercase">
+                  ✅ EXECUTION SUCCESSFUL
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <pre className="bg-background/40 p-6 rounded-2xl overflow-x-auto text-sm font-mono border border-green-500/10 shadow-inner">
+                  <code className="text-green-600 dark:text-green-400 font-bold">{JSON.stringify(job.result, null, 2)}</code>
+                </pre>
+              </CardContent>
+            </Card>
+          )}
 
-      {/* Code */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Code</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm font-mono">
-            <code>{job.code}</code>
-          </pre>
-        </CardContent>
-      </Card>
+          {job.status === 'FAILED' && job.error && (
+            <Card className="border-destructive/20 bg-destructive/5 backdrop-blur-sm shadow-xl shadow-destructive/5 animate-in shake duration-500">
+              <CardHeader className="pb-3 border-b border-destructive/10">
+                <CardTitle className="text-lg font-black text-destructive tracking-widest uppercase text-destructive">
+                  ❌ EXECUTION FAILED
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <pre className="bg-background/40 p-6 rounded-2xl overflow-x-auto text-sm font-mono border border-destructive/10 text-destructive shadow-inner font-bold">
+                  <code>{job.error}</code>
+                </pre>
+              </CardContent>
+            </Card>
+          )}
 
-      {/* Arguments */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Arguments</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm font-mono">
-            <code>{JSON.stringify(job.args, null, 2)}</code>
-          </pre>
-        </CardContent>
-      </Card>
+          {/* Source Code */}
+          <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
+            <CardHeader className="pb-4 border-b border-border/10">
+              <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">Source Payload</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <pre className="p-6 overflow-x-auto text-sm font-mono bg-muted/20">
+                <code className="grid gap-1">
+                  {job.code.split('\n').map((line, i) => (
+                    <div key={i} className="flex gap-4 group">
+                      <span className="w-8 shrink-0 text-muted-foreground/30 text-right select-none group-hover:text-primary transition-colors">{i + 1}</span>
+                      <span className="text-foreground/90">{line}</span>
+                    </div>
+                  ))}
+                </code>
+              </pre>
+            </CardContent>
+          </Card>
 
-      {/* Result */}
-      {job.status === 'COMPLETED' && job.result !== undefined && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg text-green-600 dark:text-green-400">
-              ✅ Result
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <pre className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 p-4 rounded-lg overflow-x-auto text-sm font-mono">
-              <code>{JSON.stringify(job.result, null, 2)}</code>
-            </pre>
-          </CardContent>
-        </Card>
-      )}
+          {/* Logs */}
+          <Card className="border-border/40 bg-black shadow-2xl overflow-hidden border-2 border-primary/10">
+            <CardHeader className="bg-primary/5 py-4 border-b border-primary/10">
+              <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-primary">Runtime Telemetry</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <LogViewer logs={job.logs || ''} />
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Error */}
-      {job.status === 'FAILED' && job.error && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg text-destructive">
-              ❌ Error
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <pre className="bg-destructive/10 border border-destructive p-4 rounded-lg overflow-x-auto text-sm font-mono text-destructive">
-              <code>{job.error}</code>
-            </pre>
-          </CardContent>
-        </Card>
-      )}
+        {/* Right Column - Metadata & Arguments (4 cols) */}
+        <div className="lg:col-span-4 space-y-8 sticky top-24">
+          <Card className="border-border/40 bg-card/50 backdrop-blur-sm overflow-hidden">
+            <CardHeader className="pb-4 border-b border-border/10 bg-muted/20">
+              <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">Execution Metadata</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <dl className="space-y-6">
+                <div className="flex justify-between items-center group">
+                  <dt className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 group-hover:text-primary/50 transition-colors">Queue Position</dt>
+                  <dd className="text-xs font-bold bg-muted/50 px-2 py-0.5 rounded border border-border/20">PRIORITY-1</dd>
+                </div>
+                <div className="space-y-1 group">
+                  <dt className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 group-hover:text-primary/50 transition-colors">Timestamp</dt>
+                  <dd className="text-sm font-bold">{new Date(job.createdAt).toLocaleString()}</dd>
+                </div>
+                {job.executionTime && (
+                  <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10 text-center animate-in zoom-in duration-300">
+                    <dt className="text-[10px] font-black uppercase tracking-widest text-primary/60 mb-1">Total Duration</dt>
+                    <dd className="text-2xl font-black tracking-tighter text-primary italic">{job.executionTime}ms</dd>
+                  </div>
+                )}
+                {job.startedAt && (
+                  <div className="space-y-1 group">
+                    <dt className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 group-hover:text-primary/50 transition-colors">Dispatched At</dt>
+                    <dd className="text-xs font-medium text-muted-foreground">{new Date(job.startedAt).toLocaleTimeString()}</dd>
+                  </div>
+                )}
+              </dl>
+            </CardContent>
+          </Card>
 
-      {/* Logs */}
-      {job.logs && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Logs</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <LogViewer logs={job.logs} />
-          </CardContent>
-        </Card>
-      )}
+          <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
+            <CardHeader className="pb-4 border-b border-border/10">
+              <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">Function Arguments</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <pre className="bg-muted/30 p-4 rounded-xl text-xs font-mono border border-border/20">
+                <code>{JSON.stringify(job.args, null, 2)}</code>
+              </pre>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

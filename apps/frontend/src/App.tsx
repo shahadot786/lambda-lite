@@ -9,21 +9,21 @@ function Navigation() {
   const location = useLocation();
 
   return (
-    <nav className="flex gap-4 justify-center mt-6">
+    <nav className="flex items-center gap-1 bg-muted/30 p-1 rounded-xl border border-border/40 backdrop-blur-sm">
       <Link
         to="/"
-        className={`px-6 py-2 rounded-md font-medium transition-colors ${location.pathname === '/'
-            ? 'bg-white/20 text-white'
-            : 'text-white/80 hover:bg-white/10 hover:text-white'
+        className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${location.pathname === '/'
+            ? 'bg-background text-foreground shadow-sm scale-[1.02]'
+            : 'text-muted-foreground hover:text-foreground hover:bg-background/40'
           }`}
       >
         All Jobs
       </Link>
       <Link
         to="/submit"
-        className={`px-6 py-2 rounded-md font-medium transition-colors ${location.pathname === '/submit'
-            ? 'bg-white/20 text-white'
-            : 'text-white/80 hover:bg-white/10 hover:text-white'
+        className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${location.pathname === '/submit'
+            ? 'bg-background text-foreground shadow-sm scale-[1.02]'
+            : 'text-muted-foreground hover:text-foreground hover:bg-background/40'
           }`}
       >
         Submit Job
@@ -36,19 +36,31 @@ function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="lambda-lite-theme">
       <BrowserRouter>
-        <div className="min-h-screen flex flex-col bg-background">
-          <header className="bg-gradient-to-r from-primary to-primary/80 text-white shadow-lg">
-            <div className="container mx-auto px-4 py-8 text-center relative">
-              <div className="absolute right-4 top-4">
+        <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-primary/30">
+          <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+            <div className="container flex h-16 items-center justify-between">
+              <div className="flex items-center gap-10">
+                <Link to="/" className="flex items-center space-x-2.5 transition-all hover:opacity-90 active:scale-95">
+                  <span className="text-2xl font-black tracking-tighter flex items-center gap-1">
+                    <span className="text-primary italic">⚡</span>
+                    <span>LAMBDA<span className="text-primary">LITE</span></span>
+                  </span>
+                </Link>
+                <div className="hidden md:block">
+                  <Navigation />
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="md:hidden">
+                  <Navigation />
+                </div>
+                <div className="h-8 w-[1px] bg-border/40 mx-2 hidden md:block" />
                 <ThemeToggle />
               </div>
-              <h1 className="text-4xl font-bold mb-2">⚡ Lambda Lite</h1>
-              <p className="text-lg text-white/90">Distributed Task Executor</p>
-              <Navigation />
             </div>
           </header>
 
-          <main className="flex-1 container mx-auto px-4 py-8 max-w-7xl">
+          <main className="flex-1 container py-10 max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
             <Routes>
               <Route path="/" element={<JobList />} />
               <Route path="/submit" element={<JobSubmit />} />
@@ -56,8 +68,23 @@ function App() {
             </Routes>
           </main>
 
-          <footer className="bg-card border-t border-border py-6 text-center text-muted-foreground">
-            <p>Built with Node.js, Docker, Redis, MongoDB, and React</p>
+          <footer className="border-t border-border/20 bg-muted/20 py-12">
+            <div className="container flex flex-col items-center justify-between gap-6 md:flex-row">
+              <div className="flex flex-col gap-2 text-center md:text-left">
+                <p className="text-sm font-semibold tracking-tight">Lambda Lite Executor</p>
+                <p className="text-xs text-muted-foreground/80 max-w-[300px]">
+                  A high-performance distributed task execution platform built for the modern edge.
+                </p>
+              </div>
+              <div className="flex flex-col gap-4 items-center md:items-end">
+                <p className="text-xs text-muted-foreground/60 font-medium">
+                  Built with Node.js, Docker, Redis, MongoDB & React
+                </p>
+                <p className="text-[10px] text-muted-foreground/40 uppercase tracking-widest font-bold">
+                  © 2025 ALL RIGHTS RESERVED
+                </p>
+              </div>
+            </div>
           </footer>
         </div>
       </BrowserRouter>
