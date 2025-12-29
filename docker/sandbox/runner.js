@@ -20,22 +20,20 @@ const originalConsole = {
 
 console.log = (...args) => {
   logs += args.join(' ') + '\n';
-  originalConsole.log(...args);
+  // Don't write to stdout - it interferes with JSON output
 };
 
 console.error = (...args) => {
   logs += '[ERROR] ' + args.join(' ') + '\n';
-  originalConsole.error(...args);
+  // Don't write to stderr - keep it clean
 };
 
 console.warn = (...args) => {
   logs += '[WARN] ' + args.join(' ') + '\n';
-  originalConsole.warn(...args);
 };
 
 console.info = (...args) => {
   logs += '[INFO] ' + args.join(' ') + '\n';
-  originalConsole.info(...args);
 };
 
 async function executeCode(code, args) {
