@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import CodeEditor from '../components/CodeEditor';
 import { jobService } from '../services/api';
 
@@ -32,14 +32,14 @@ export default function JobSubmit() {
         }
       }
 
-      const response = await jobService.submitJob({
+      await jobService.submitJob({
         code,
         args: parsedArgs,
         timeout: parseInt(timeout),
       });
 
-      // Navigate to job status page
-      navigate(`/job/${response.job.id}`);
+      // Navigate to job list
+      navigate('/');
     } catch (err: any) {
       setError(err.response?.data?.error || err.message || 'Failed to submit job');
     } finally {
@@ -49,10 +49,17 @@ export default function JobSubmit() {
 
   return (
     <div className="job-submit">
-      <h1>Submit Job</h1>
-      <p className="subtitle">
-        Write JavaScript code and execute it in a secure sandbox environment
-      </p>
+      <div className="header">
+        <div>
+          <h1>Submit Job</h1>
+          <p className="subtitle">
+            Write JavaScript code and execute it in a secure sandbox environment
+          </p>
+        </div>
+        <Link to="/" className="btn-secondary">
+          ← Back to Jobs
+        </Link>
+      </div>
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">

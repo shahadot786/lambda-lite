@@ -62,9 +62,14 @@ export default function JobStatus() {
     <div className="job-status">
       <div className="header">
         <h1>Job Status</h1>
-        <Link to="/" className="btn-secondary">
-          Submit New Job
-        </Link>
+        <div className="header-actions">
+          <Link to="/" className="btn-secondary">
+            ← Back to Jobs
+          </Link>
+          <Link to="/submit" className="btn-primary">
+            Submit New Job
+          </Link>
+        </div>
       </div>
 
       <div className="job-info">

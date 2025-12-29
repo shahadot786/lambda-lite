@@ -77,6 +77,143 @@ code {
   border-top: 1px solid var(--border);
 }
 
+/* Navigation */
+.app-nav {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.app-nav a {
+  padding: 0.5rem 1.5rem;
+  border-radius: 6px;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.app-nav a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.app-nav a.active {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* Job List Page */
+.job-list {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.job-list .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.job-list .header h1 {
+  margin-bottom: 0.5rem;
+}
+
+.loading-indicator {
+  color: var(--warning);
+  font-size: 0.875rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-secondary);
+}
+
+.empty-state p {
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+}
+
+.table-container {
+  overflow-x: auto;
+  margin-bottom: 2rem;
+}
+
+.jobs-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-input);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.jobs-table thead {
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.jobs-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border);
+}
+
+.jobs-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.job-row {
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.job-row:hover {
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.job-row:last-child td {
+  border-bottom: none;
+}
+
+.job-id {
+  font-family: 'Courier New', monospace;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.result-preview {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.page-info {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
 /* Job Submit Page */
 .job-submit {
   background: var(--bg-card);
@@ -304,12 +441,37 @@ code {
     grid-template-columns: 1fr;
   }
 
-  .job-status .header {
+  .job-status .header,
+  .job-list .header,
+  .job-submit .header {
     flex-direction: column;
     gap: 1rem;
+    align-items: stretch;
+  }
+
+  .header-actions {
+    flex-direction: column;
   }
 
   .app-main {
     padding: 1rem;
+  }
+
+  .app-nav {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .jobs-table {
+    font-size: 0.875rem;
+  }
+
+  .jobs-table th,
+  .jobs-table td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .result-preview {
+    max-width: 150px;
   }
 }

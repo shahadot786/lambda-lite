@@ -37,12 +37,25 @@ export const jobService = {
 
   async getJob(id: string): Promise<Job> {
     const response = await api.get(`/jobs/${id}`);
-    return response.data.job;
+    const job = response.data.job;
+    // Map MongoDB _id to id for consistency
+    return {
+      ...job,
+      id: job._id || job.id,
+    };
   },
 
   async getJobs(page: number = 1, limit: number = 20) {
     const response = await api.get('/jobs', { params: { page, limit } });
-    return response.data;
+    // Map MongoDB _id to id for consistency
+    const jobs = response.data.jobs.map((job: any) => ({
+      ...job,
+      id: job._id || job.id,
+    }));
+    return {
+      ...response.data,
+      jobs,
+    };
   },
 
   async getJobLogs(id: string) {
