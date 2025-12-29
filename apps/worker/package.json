@@ -1,0 +1,30 @@
+{
+  "name": "@lambda-lite/worker",
+  "version": "1.0.0",
+  "description": "Worker service for lambda-lite",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@lambda-lite/shared": "file:../../shared",
+    "bullmq": "^5.1.5",
+    "dockerode": "^4.0.2",
+    "dotenv": "^16.3.1",
+    "ioredis": "^5.3.2",
+    "mongoose": "^8.0.3",
+    "socket.io-client": "^4.8.3",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "@types/dockerode": "^3.3.23",
+    "@types/node": "^20.10.6",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.3"
+  }
+}
