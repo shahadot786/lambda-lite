@@ -141,7 +141,10 @@ export default function Analytics() {
 
 function KpiCard({ title, value, description, icon, trend }: { title: string, value: string, description: string, icon: string, trend?: 'positive' | 'neutral' }) {
   return (
-    <Card className="border-border/40 bg-card/90 dark:bg-card/50 backdrop-blur-md shadow-xl lg:shadow-2xl shadow-primary/10">
+    <Card
+      className="border-border/40 bg-card/90 dark:bg-card/50 backdrop-blur-md shadow-xl lg:shadow-2xl shadow-primary/10 transition-all hover:shadow-primary/20 hover:scale-[1.01]"
+      title={description}
+    >
       <CardContent className="p-6">
         <div className="flex justify-between items-start mb-4">
           <span className="text-2xl">{icon}</span>

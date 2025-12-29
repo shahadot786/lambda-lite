@@ -45,8 +45,10 @@ export const jobService = {
     };
   },
 
-  async getJobs(page: number = 1, limit: number = 20) {
-    const response = await api.get('/jobs', { params: { page, limit } });
+  async getJobs(page: number = 1, limit: number = 10, status?: string) {
+    const response = await api.get('/jobs', {
+      params: { page, limit, status },
+    });
     // Map MongoDB _id to id for consistency
     const jobs = response.data.jobs.map((job: any) => ({
       ...job,
@@ -66,5 +68,15 @@ export const jobService = {
   async getAnalytics() {
     const response = await api.get('/jobs/analytics');
     return response.data;
-  }
+  },
+
+  async rerunJob(id: string) {
+    const response = await api.post(`/jobs/${id}/rerun`);
+    return response.data;
+  },
+
+  async purgeJobs() {
+    const response = await api.delete('/jobs');
+    return response.data;
+  },
 };

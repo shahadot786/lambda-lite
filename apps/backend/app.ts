@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import jobRoutes from './src/routes/job.routes';
 import { register } from './src/metrics/prometheus';
+import { JobService } from './src/services/job.service';
 
 const app = express();
 
@@ -17,8 +18,13 @@ app.get('/health', (req, res) => {
 
 // Metrics endpoint
 app.get('/metrics', async (req, res) => {
-  res.set('Content-Type', register.contentType);
-  res.end(await register.metrics());
+  try {
+    await JobService.syncMetrics();
+    res.set('Content-Type', register.contentType);
+    res.end(await register.metrics());
+  } catch (error: any) {
+    res.status(500).end(error.message);
+  }
 });
 
 // API routes

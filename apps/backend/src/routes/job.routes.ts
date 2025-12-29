@@ -33,8 +33,18 @@ router.get('/', JobController.getJobs);
 router.get('/:id', JobController.getJob);
 
 /**
+ * POST /api/jobs/:id/rerun - Re-run an existing job
+ */
+router.post('/:id/rerun', JobController.rerunJob);
+
+/**
  * GET /api/jobs/:id/logs - Get job logs
  */
 router.get('/:id/logs', JobController.getJobLogs);
+
+/**
+ * DELETE /api/jobs - Purge all jobs
+ */
+router.delete('/', JobController.purgeJobs);
 
 export default router;

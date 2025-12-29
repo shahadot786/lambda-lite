@@ -129,4 +129,47 @@ export class JobController {
       });
     }
   }
+
+  /**
+   * Re-run an existing job
+   * POST /api/jobs/:id/rerun
+   */
+  static async rerunJob(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const job = await JobService.rerunJob(id);
+      res.status(201).json({
+        success: true,
+        job: {
+          id: job._id,
+          status: job.status,
+          createdAt: job.createdAt,
+        },
+      });
+    } catch (error: any) {
+      res.status(404).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
+
+  /**
+   * Purge all jobs
+   * DELETE /api/jobs
+   */
+  static async purgeJobs(req: Request, res: Response) {
+    try {
+      await JobService.purgeJobs();
+      res.json({
+        success: true,
+        message: 'All jobs purged successfully',
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
 }

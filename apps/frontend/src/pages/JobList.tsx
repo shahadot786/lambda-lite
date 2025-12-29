@@ -14,10 +14,13 @@ export default function JobList() {
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [purging, setPurging] = useState(false);
 
   const fetchJobs = async () => {
     try {
-      const response = await jobService.getJobs(page, 10);
+      const statusParam = statusFilter === 'ALL' ? undefined : statusFilter;
+      const response = await jobService.getJobs(page, 10, statusParam);
       setJobs(response.jobs);
       setTotalPages(response.pages);
       setLoading(false);
@@ -46,7 +49,7 @@ export default function JobList() {
     return () => {
       websocketService.off('job:update', handleJobUpdate);
     };
-  }, [page]);
+  }, [page, statusFilter]);
 
   const getStatusVariant = (status: string) => {
     switch (status) {
@@ -83,6 +86,20 @@ export default function JobList() {
     return `${seconds}s ago`;
   };
 
+  const handlePurge = async () => {
+    if (!window.confirm('Are you absolutely sure? This will delete all jobs from history.')) return;
+    try {
+      setPurging(true);
+      await jobService.purgeJobs();
+      setJobs([]);
+      setPage(1);
+      setPurging(false);
+    } catch (err: any) {
+      setError('Failed to purge jobs');
+      setPurging(false);
+    }
+  };
+
   if (loading && jobs.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -109,24 +126,55 @@ export default function JobList() {
             {loading && <span className="text-primary animate-pulse ml-2 font-bold inline-block">• Synchronizing...</span>}
           </CardDescription>
         </div>
-        <Link to="/submit" className="w-full sm:w-auto">
-          <Button size="lg" className="w-full sm:w-auto font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform active:scale-95">
-            + Submit New Job
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
+            className="bg-muted/50 border border-border/40 rounded-xl px-4 py-2 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none hover:bg-muted transition-colors cursor-pointer appearance-none min-w-[120px]"
+          >
+            <option value="ALL">ALL STATUS</option>
+            <option value="PENDING">PENDING</option>
+            <option value="RUNNING">RUNNING</option>
+            <option value="COMPLETED">COMPLETED</option>
+            <option value="FAILED">FAILED</option>
+          </select>
+
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handlePurge}
+            disabled={purging || jobs.length === 0}
+            className="font-bold rounded-xl opacity-60 hover:opacity-100 transition-opacity"
+          >
+            {purging ? 'PURGING...' : 'PURGE ALL'}
           </Button>
-        </Link>
+
+          <Link to="/submit" className="w-full sm:w-auto">
+            <Button size="lg" className="w-full sm:w-auto font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform active:scale-95">
+              + Submit New Job
+            </Button>
+          </Link>
+        </div>
       </CardHeader>
 
       <CardContent className="px-2 sm:px-6">
         {jobs.length === 0 ? (
-          <div className="text-center py-12 sm:py-24 border-2 border-dashed border-border/40 rounded-3xl bg-muted/10 px-4">
-            <div className="mb-4 sm:mb-6 text-3xl sm:text-4xl">🚀</div>
-            <h3 className="text-lg sm:text-xl font-bold mb-2">Ready to fly?</h3>
-            <p className="text-sm text-muted-foreground mb-6 sm:mb-8 max-w-[400px] mx-auto">
-              Your task execution queue is waiting for its first payload. Submit a job to see the engine in action.
+          <div className="text-center py-16 sm:py-32 px-4 animate-in fade-in zoom-in duration-500">
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary/5 border border-primary/10 mb-8 relative">
+              <span className="text-5xl animate-bounce">🚀</span>
+              <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-pulse scale-125 opacity-20" />
+            </div>
+            <h3 className="text-2xl sm:text-3xl font-black mb-4 tracking-tight uppercase">No Jobs Dispatched</h3>
+            <p className="text-base text-muted-foreground mb-10 max-w-[500px] mx-auto font-medium leading-relaxed">
+              Your distributed execution engine is idle and awaiting instructions.
+              {statusFilter !== 'ALL' ? ` No jobs currently match the "${statusFilter}" status filter.` : ' Submit your first payload to ignite the worker pool.'}
             </p>
             <Link to="/submit">
-              <Button size="lg" variant="outline" className="border-primary/20 hover:bg-primary/10 w-full sm:w-auto">
-                Launch First Job
+              <Button size="lg" className="h-14 px-10 rounded-2xl font-black text-lg shadow-2xl shadow-primary/30 hover:scale-105 transition-all">
+                LAUNCH NEW TASK
               </Button>
             </Link>
           </div>

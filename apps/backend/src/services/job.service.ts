@@ -1,7 +1,7 @@
 import { Job } from '../models/Job.model';
 import { JobStatus, JobSubmission } from '@lambda-lite/shared';
 import { QueueService } from './queue.service';
-import { jobSubmissionCounter, jobCompletionCounter, jobExecutionHistogram } from '../metrics/prometheus';
+import { jobSubmissionGauge, jobCompletionGauge, jobExecutionHistogram, activeJobsGauge, queueSizeGauge } from '../metrics/prometheus';
 
 export class JobService {
   /**
@@ -60,11 +60,10 @@ export class JobService {
 
     await job.save();
 
+    await job.save();
+
     // Add to queue
     await QueueService.addJob(job._id.toString(), code, args, timeout);
-
-    // Track submission metric
-    jobSubmissionCounter.inc();
 
     return job;
   }
@@ -135,14 +134,10 @@ export class JobService {
 
     await job.save();
 
-    // Track completion metrics
-    if (status === JobStatus.COMPLETED || status === JobStatus.FAILED) {
-      jobCompletionCounter.inc({ status });
-      
-      if (updates.executionTime) {
-        // Convert ms to seconds for Prometheus histogram
-        jobExecutionHistogram.observe(updates.executionTime / 1000);
-      }
+    // Track execution latency if available
+    if ((status === JobStatus.COMPLETED || status === JobStatus.FAILED) && updates.executionTime) {
+      // Convert ms to seconds for Prometheus histogram
+      jobExecutionHistogram.observe(updates.executionTime / 1000);
     }
 
     return job;
@@ -193,5 +188,52 @@ export class JobService {
         active,
       }
     };
+  }
+
+  /**
+   * Sync Prometheus metrics with current system state
+   */
+  static async syncMetrics() {
+    const [stats, [waiting, active]] = await Promise.all([
+      Job.aggregate([
+        { $group: { _id: '$status', count: { $sum: 1 } } }
+      ]),
+      Promise.all([
+        QueueService.jobQueue.getWaitingCount(),
+        QueueService.jobQueue.getActiveCount()
+      ])
+    ]);
+
+    let total = 0;
+    stats.forEach(s => {
+      const count = s.count || 0;
+      total += count;
+      jobCompletionGauge.set({ status: s._id }, count);
+    });
+
+    jobSubmissionGauge.set(total);
+    queueSizeGauge.set(waiting);
+    activeJobsGauge.set(active);
+  }
+
+  /**
+   * Re-run an existing job
+   */
+  static async rerunJob(jobId: string) {
+    const original = await this.getJob(jobId);
+    return this.createJob({
+      code: original.code,
+      args: original.args,
+    });
+  }
+
+  /**
+   * Purge all jobs
+   */
+  static async purgeJobs() {
+    await Promise.all([
+      Job.deleteMany({}),
+      QueueService.jobQueue.drain(),
+    ]);
   }
 }

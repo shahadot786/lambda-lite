@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import LogViewer from '../components/LogViewer';
 import { jobService, Job } from '../services/api';
 import { websocketService } from '../services/websocket';
@@ -8,9 +8,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
 export default function JobStatus() {
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
+  const [rerunning, setRerunning] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -60,6 +62,19 @@ export default function JobStatus() {
       case 'COMPLETED': return '✅';
       case 'FAILED': return '❌';
       default: return '❓';
+    }
+  };
+
+  const handleRerun = async () => {
+    if (!id || rerunning) return;
+    try {
+      setRerunning(true);
+      const response = await jobService.rerunJob(id);
+      navigate(`/job/${response.job.id}`);
+      window.location.reload(); // Force reload to fetch new job if navigation doesn't trigger effect
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to re-run job');
+      setRerunning(false);
     }
   };
 
@@ -113,6 +128,14 @@ export default function JobStatus() {
               ← QUEUE
             </Button>
           </Link>
+          <Button
+            variant="secondary"
+            onClick={handleRerun}
+            disabled={rerunning}
+            className="flex-1 sm:flex-none font-bold rounded-xl shadow-lg text-xs sm:text-sm"
+          >
+            {rerunning ? 'PENDING...' : 'RE-RUN'}
+          </Button>
           <Link to="/submit" className="flex-1 sm:flex-none">
             <Button className="w-full sm:w-auto font-bold rounded-xl shadow-lg shadow-primary/20 text-xs sm:text-sm">
               SUBMIT NEW
