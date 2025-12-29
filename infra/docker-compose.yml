@@ -1,0 +1,130 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7
+    container_name: lambda-lite-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: lambda-lite
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - lambda-lite-network
+
+  # Redis Queue
+  redis:
+    image: redis:7-alpine
+    container_name: lambda-lite-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - redis_data:/data
+    networks:
+      - lambda-lite-network
+
+  # Backend API
+  backend:
+    build:
+      context: ../apps/backend
+      dockerfile: Dockerfile
+    container_name: lambda-lite-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      MONGODB_URI: mongodb://mongodb:27017/lambda-lite
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - lambda-lite-network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  # Worker Service (scalable)
+  worker:
+    build:
+      context: ../apps/worker
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: mongodb://mongodb:27017/lambda-lite
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SANDBOX_IMAGE: lambda-lite-sandbox:latest
+    depends_on:
+      - mongodb
+      - redis
+      - sandbox
+    networks:
+      - lambda-lite-network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      replicas: 2
+
+  # Sandbox Image Builder
+  sandbox:
+    build:
+      context: ../docker/sandbox
+      dockerfile: Dockerfile
+    image: lambda-lite-sandbox:latest
+    container_name: lambda-lite-sandbox-builder
+    command: /bin/true
+    networks:
+      - lambda-lite-network
+
+  # Frontend UI
+  frontend:
+    build:
+      context: ../apps/frontend
+      dockerfile: Dockerfile
+    container_name: lambda-lite-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    environment:
+      VITE_API_URL: http://localhost:3000
+    depends_on:
+      - backend
+    networks:
+      - lambda-lite-network
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: lambda-lite-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    depends_on:
+      - backend
+    networks:
+      - lambda-lite-network
+
+networks:
+  lambda-lite-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+  redis_data:
+  prometheus_data:

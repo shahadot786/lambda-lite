@@ -21,6 +21,9 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Install Docker CLI for Docker-in-Docker
+RUN apk add --no-cache docker-cli
+
 # Copy package files
 COPY package*.json ./
 
@@ -30,8 +33,5 @@ RUN npm ci --only=production
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
 
-# Expose port
-EXPOSE 3000
-
-# Start server
-CMD ["node", "dist/server.js"]
+# Start worker
+CMD ["node", "dist/index.js"]
