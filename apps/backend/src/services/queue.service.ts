@@ -27,6 +27,8 @@ export const jobQueue = new Queue('jobs', {
 });
 
 export class QueueService {
+  static jobQueue = jobQueue;
+  
   static async addJob(jobId: string, code: string, args: any[], timeout: number = 30000) {
     await jobQueue.add(
       'execute',

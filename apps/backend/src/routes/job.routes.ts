@@ -18,6 +18,11 @@ router.post(
 );
 
 /**
+ * GET /api/jobs/analytics - Get aggregated analytics
+ */
+router.get('/analytics', JobController.getAnalytics);
+
+/**
  * GET /api/jobs - Get all jobs
  */
 router.get('/', JobController.getJobs);

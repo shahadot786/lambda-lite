@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-do
 import JobList from './pages/JobList';
 import JobSubmit from './pages/JobSubmit';
 import JobStatus from './pages/JobStatus';
+import Analytics from './pages/Analytics';
 import { ThemeProvider } from './components/theme-provider';
 import { ThemeToggle } from './components/theme-toggle';
 
@@ -27,6 +28,15 @@ function Navigation() {
           }`}
       >
         Submit
+      </Link>
+      <Link
+        to="/analytics"
+        className={`px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${location.pathname === '/analytics'
+          ? 'bg-background text-foreground shadow-sm scale-[1.02]'
+          : 'text-muted-foreground hover:text-foreground hover:bg-background/40'
+          }`}
+      >
+        Stats
       </Link>
     </nav>
   );
@@ -66,6 +76,7 @@ function App() {
               <Route path="/" element={<JobList />} />
               <Route path="/submit" element={<JobSubmit />} />
               <Route path="/job/:id" element={<JobStatus />} />
+              <Route path="/analytics" element={<Analytics />} />
             </Routes>
           </main>
 

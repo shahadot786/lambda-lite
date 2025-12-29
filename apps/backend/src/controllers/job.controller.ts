@@ -110,4 +110,23 @@ export class JobController {
       });
     }
   }
+
+  /**
+   * Get job analytics
+   * GET /api/jobs/analytics
+   */
+  static async getAnalytics(req: Request, res: Response) {
+    try {
+      const stats = await JobService.getAnalytics();
+      res.json({
+        success: true,
+        stats,
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
 }

@@ -1,6 +1,7 @@
 import { Job } from '../models/Job.model';
 import { JobStatus, JobSubmission } from '@lambda-lite/shared';
 import { QueueService } from './queue.service';
+import { jobSubmissionCounter, jobCompletionCounter, jobExecutionHistogram } from '../metrics/prometheus';
 
 export class JobService {
   /**
@@ -61,6 +62,9 @@ export class JobService {
 
     // Add to queue
     await QueueService.addJob(job._id.toString(), code, args, timeout);
+
+    // Track submission metric
+    jobSubmissionCounter.inc();
 
     return job;
   }
@@ -130,6 +134,64 @@ export class JobService {
     Object.assign(job, updates);
 
     await job.save();
+
+    // Track completion metrics
+    if (status === JobStatus.COMPLETED || status === JobStatus.FAILED) {
+      jobCompletionCounter.inc({ status });
+      
+      if (updates.executionTime) {
+        // Convert ms to seconds for Prometheus histogram
+        jobExecutionHistogram.observe(updates.executionTime / 1000);
+      }
+    }
+
     return job;
+  }
+
+  /**
+   * Get aggregated analytics
+   */
+  static async getAnalytics() {
+    const [totalJobs, statusStats, avgExecution] = await Promise.all([
+      Job.countDocuments(),
+      Job.aggregate([
+        { $group: { _id: '$status', count: { $sum: 1 } } }
+      ]),
+      Job.aggregate([
+        { $match: { status: JobStatus.COMPLETED, executionTime: { $exists: true } } },
+        { $group: { _id: null, avgTime: { $avg: '$executionTime' } } }
+      ])
+    ]);
+
+    const stats: Record<string, number> = {
+      total: totalJobs,
+      completed: 0,
+      failed: 0,
+      pending: 0,
+      running: 0,
+    };
+
+    statusStats.forEach(s => {
+      if (s._id) stats[s._id.toLowerCase()] = s.count;
+    });
+
+    // Get Queue stats from BullMQ
+    const [waiting, active] = await Promise.all([
+      QueueService.jobQueue.getWaitingCount(),
+      QueueService.jobQueue.getActiveCount()
+    ]);
+
+    return {
+      overview: {
+        totalJobs,
+        successRate: totalJobs > 0 ? (stats.completed / totalJobs) * 100 : 0,
+        avgExecutionTime: avgExecution[0]?.avgTime || 0,
+      },
+      statusDistribution: stats,
+      queuePressure: {
+        waiting,
+        active,
+      }
+    };
   }
 }

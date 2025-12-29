@@ -62,4 +62,9 @@ export const jobService = {
     const response = await api.get(`/jobs/${id}/logs`);
     return response.data;
   },
+
+  async getAnalytics() {
+    const response = await api.get('/jobs/analytics');
+    return response.data;
+  }
 };
