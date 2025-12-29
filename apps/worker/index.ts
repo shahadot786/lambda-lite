@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { logger } from './src/logger/jobLogger';
 import { jobWorker } from './src/queue/job.consumer';
+import { connectToBackend } from './src/websocket/client';
 
 dotenv.config();
 
@@ -13,6 +14,10 @@ async function startWorker() {
     logger.info('Connecting to MongoDB...');
     await mongoose.connect(MONGODB_URI);
     logger.info('✓ MongoDB connected');
+
+    // Connect to backend WebSocket
+    connectToBackend();
+    logger.info('✓ WebSocket client connected');
 
     logger.info('✓ Worker started and listening for jobs');
     logger.info(`  - Queue: jobs`);

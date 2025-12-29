@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import CodeEditor from '../components/CodeEditor';
 import { jobService } from '../services/api';
+import { codeExamples, CodeExample } from '../data/codeExamples';
 
 const EXAMPLE_CODE = `// Define a main function that will be called with your arguments
 function main(a, b) {
@@ -16,6 +17,7 @@ export default function JobSubmit() {
   const [timeout, setTimeout] = useState('30000');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [selectedLevel, setSelectedLevel] = useState<CodeExample['level'] | 'all'>('all');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +49,15 @@ export default function JobSubmit() {
     }
   };
 
+  const loadExample = (example: CodeExample) => {
+    setCode(example.code);
+    setArgs(JSON.stringify(example.args));
+  };
+
+  const filteredExamples = selectedLevel === 'all'
+    ? codeExamples
+    : codeExamples.filter(ex => ex.level === selectedLevel);
+
   return (
     <div className="job-submit">
       <div className="header">
@@ -59,6 +70,41 @@ export default function JobSubmit() {
         <Link to="/" className="btn-secondary">
           ← Back to Jobs
         </Link>
+      </div>
+
+      {/* Example Selector */}
+      <div className="example-selector">
+        <div className="example-header">
+          <h3>📚 Code Examples</h3>
+          <select
+            value={selectedLevel}
+            onChange={(e) => setSelectedLevel(e.target.value as any)}
+            className="level-filter"
+          >
+            <option value="all">All Levels</option>
+            <option value="beginner">🟢 Beginner</option>
+            <option value="intermediate">🟡 Intermediate</option>
+            <option value="advanced">🟠 Advanced</option>
+            <option value="expert">🔴 Expert</option>
+          </select>
+        </div>
+
+        <div className="examples-grid">
+          {filteredExamples.map((example) => (
+            <button
+              key={example.id}
+              onClick={() => loadExample(example)}
+              className="example-card"
+              data-level={example.level}
+              type="button"
+            >
+              <div className="example-level">{example.level}</div>
+              <div className="example-title">{example.title}</div>
+              <div className="example-description">{example.description}</div>
+              <div className="example-category">📁 {example.category}</div>
+            </button>
+          ))}
+        </div>
       </div>
 
       <form onSubmit={handleSubmit}>

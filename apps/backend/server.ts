@@ -1,6 +1,8 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import { createServer } from 'http';
 import app from './app';
+import { initializeWebSocket } from './src/websocket/socket';
 
 dotenv.config();
 
@@ -14,12 +16,20 @@ async function startServer() {
     await mongoose.connect(MONGODB_URI);
     console.log('✓ MongoDB connected');
 
-    // Start Express server
-    app.listen(PORT, () => {
+    // Create HTTP server
+    const httpServer = createServer(app);
+
+    // Initialize WebSocket
+    initializeWebSocket(httpServer);
+    console.log('✓ WebSocket initialized');
+
+    // Start server
+    httpServer.listen(PORT, () => {
       console.log(`✓ Server running on port ${PORT}`);
       console.log(`  - Health: http://localhost:${PORT}/health`);
       console.log(`  - Metrics: http://localhost:${PORT}/metrics`);
       console.log(`  - API: http://localhost:${PORT}/api/jobs`);
+      console.log(`  - WebSocket: ws://localhost:${PORT}`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

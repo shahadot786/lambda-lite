@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import { logger } from '../logger/jobLogger';
 import { DockerExecutor } from '../executor/dockerExecutor';
 import { JobStatus } from '@lambda-lite/shared';
+import { emitJobUpdate } from '../websocket/client';
 
 // Import Job model (we'll need to connect to MongoDB)
 const JobSchema = new mongoose.Schema({
@@ -44,6 +45,9 @@ export const jobWorker = new Worker(
         startedAt: new Date(),
       });
 
+      // Emit WebSocket update
+      emitJobUpdate(jobId, { status: JobStatus.RUNNING });
+
       logger.info('Job started', { jobId });
 
       // Execute code in sandbox
@@ -59,8 +63,8 @@ export const jobWorker = new Worker(
         executionTime: result.executionTime,
       });
 
-      // Update job with result
       if (result.success) {
+        // Update job with success result
         await JobModel.findByIdAndUpdate(jobId, {
           status: JobStatus.COMPLETED,
           result: result.result,
@@ -68,7 +72,18 @@ export const jobWorker = new Worker(
           executionTime: result.executionTime,
           completedAt: new Date(),
         });
+
+        // Emit WebSocket update
+        emitJobUpdate(jobId, {
+          status: JobStatus.COMPLETED,
+          result: result.result,
+          logs: result.logs,
+          executionTime: result.executionTime,
+        });
+
+        logger.info('Job completed successfully', { jobId });
       } else {
+        // Update job with error
         await JobModel.findByIdAndUpdate(jobId, {
           status: JobStatus.FAILED,
           error: result.error,
@@ -76,17 +91,33 @@ export const jobWorker = new Worker(
           executionTime: result.executionTime,
           completedAt: new Date(),
         });
+
+        // Emit WebSocket update
+        emitJobUpdate(jobId, {
+          status: JobStatus.FAILED,
+          error: result.error,
+          logs: result.logs,
+          executionTime: result.executionTime,
+        });
+
+        logger.error('Job failed', { jobId, error: result.error });
       }
 
       return result;
     } catch (error: any) {
       logger.error('Job processing error', { jobId, error: error.message });
 
-      // Update job status to FAILED
+      // Update job with error status
       await JobModel.findByIdAndUpdate(jobId, {
         status: JobStatus.FAILED,
         error: error.message,
         completedAt: new Date(),
+      });
+
+      // Emit WebSocket update
+      emitJobUpdate(jobId, {
+        status: JobStatus.FAILED,
+        error: error.message,
       });
 
       throw error;
@@ -104,11 +135,11 @@ export const jobWorker = new Worker(
 
 // Worker event handlers
 jobWorker.on('completed', (job) => {
-  logger.info('Job completed', { jobId: job.id });
+  logger.info('Job completed event', { jobId: job.id });
 });
 
 jobWorker.on('failed', (job, err) => {
-  logger.error('Job failed', { jobId: job?.id, error: err.message });
+  logger.error('Job failed event', { jobId: job?.id, error: err.message });
 });
 
 jobWorker.on('error', (err) => {
