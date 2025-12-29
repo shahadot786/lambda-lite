@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { jobService, Job } from '../services/api';
+import { websocketService } from '../services/websocket';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 export default function JobList() {
   const navigate = useNavigate();
@@ -26,39 +31,42 @@ export default function JobList() {
 
   useEffect(() => {
     fetchJobs();
+    websocketService.connect();
 
-    // Auto-refresh every 5 seconds
-    const interval = setInterval(fetchJobs, 5000);
-    return () => clearInterval(interval);
+    const handleJobUpdate = (data: any) => {
+      setJobs(prevJobs =>
+        prevJobs.map(job =>
+          job.id === data.jobId
+            ? { ...job, ...data, id: data.jobId }
+            : job
+        )
+      );
+    };
+
+    websocketService.on('job:update', handleJobUpdate);
+
+    return () => {
+      websocketService.off('job:update', handleJobUpdate);
+    };
   }, [page]);
 
-  const getStatusIcon = (status: string) => {
+  const getStatusVariant = (status: string) => {
     switch (status) {
-      case 'PENDING':
-        return '⏳';
-      case 'RUNNING':
-        return '▶️';
-      case 'COMPLETED':
-        return '✅';
-      case 'FAILED':
-        return '❌';
-      default:
-        return '❓';
+      case 'COMPLETED': return 'success';
+      case 'FAILED': return 'destructive';
+      case 'RUNNING': return 'warning';
+      case 'PENDING': return 'pending';
+      default: return 'default';
     }
   };
 
-  const getStatusClass = (status: string) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'PENDING':
-        return 'status-pending';
-      case 'RUNNING':
-        return 'status-running';
-      case 'COMPLETED':
-        return 'status-completed';
-      case 'FAILED':
-        return 'status-failed';
-      default:
-        return '';
+      case 'PENDING': return '⏳';
+      case 'RUNNING': return '▶️';
+      case 'COMPLETED': return '✅';
+      case 'FAILED': return '❌';
+      default: return '❓';
     }
   };
 
@@ -78,101 +86,111 @@ export default function JobList() {
   };
 
   if (loading && jobs.length === 0) {
-    return <div className="loading">Loading jobs...</div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-muted-foreground">Loading jobs...</p>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="error-message">{error}</div>;
+    return (
+      <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded-lg">
+        {error}
+      </div>
+    );
   }
 
   return (
-    <div className="job-list">
-      <div className="header">
+    <Card>
+      <CardHeader className="flex flex-row items-start justify-between space-y-0">
         <div>
-          <h1>Jobs</h1>
-          <p className="subtitle">
+          <CardTitle className="text-2xl">Jobs</CardTitle>
+          <CardDescription>
             {total} total job{total !== 1 ? 's' : ''}
-            {loading && <span className="loading-indicator"> (updating...)</span>}
-          </p>
+            {loading && <span className="text-yellow-500 ml-2">(updating...)</span>}
+          </CardDescription>
         </div>
-        <Link to="/submit" className="btn-primary">
-          + Submit New Job
+        <Link to="/submit">
+          <Button>+ Submit New Job</Button>
         </Link>
-      </div>
+      </CardHeader>
 
-      {jobs.length === 0 ? (
-        <div className="empty-state">
-          <p>No jobs yet</p>
-          <Link to="/submit" className="btn-primary">
-            Submit Your First Job
-          </Link>
-        </div>
-      ) : (
-        <>
-          <div className="table-container">
-            <table className="jobs-table">
-              <thead>
-                <tr>
-                  <th>Status</th>
-                  <th>Job ID</th>
-                  <th>Created</th>
-                  <th>Execution Time</th>
-                  <th>Result</th>
-                </tr>
-              </thead>
-              <tbody>
+      <CardContent>
+        {jobs.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-lg text-muted-foreground mb-4">No jobs yet</p>
+            <Link to="/submit">
+              <Button>Submit Your First Job</Button>
+            </Link>
+          </div>
+        ) : (
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Job ID</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead>Execution Time</TableHead>
+                  <TableHead>Result</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {jobs.map((job) => (
-                  <tr
+                  <TableRow
                     key={job.id}
                     onClick={() => navigate(`/job/${job.id}`)}
-                    className="job-row"
+                    className="cursor-pointer"
                   >
-                    <td>
-                      <span className={`status-badge ${getStatusClass(job.status)}`}>
+                    <TableCell>
+                      <Badge variant={getStatusVariant(job.status) as any}>
                         {getStatusIcon(job.status)} {job.status}
-                      </span>
-                    </td>
-                    <td className="job-id">{job.id?.slice(0, 8) || 'N/A'}...</td>
-                    <td>{formatTime(job.createdAt)}</td>
-                    <td>
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="font-mono text-sm text-muted-foreground">
+                      {job.id?.slice(0, 8) || 'N/A'}...
+                    </TableCell>
+                    <TableCell>{formatTime(job.createdAt)}</TableCell>
+                    <TableCell>
                       {job.executionTime ? `${job.executionTime}ms` : '-'}
-                    </td>
-                    <td className="result-preview">
+                    </TableCell>
+                    <TableCell className="max-w-xs truncate text-muted-foreground text-sm">
                       {job.status === 'COMPLETED' && job.result !== undefined
                         ? JSON.stringify(job.result).slice(0, 50)
                         : job.status === 'FAILED'
                           ? job.error?.slice(0, 50)
                           : '-'}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
 
-          {totalPages > 1 && (
-            <div className="pagination">
-              <button
-                onClick={() => setPage(page - 1)}
-                disabled={page === 1}
-                className="btn-secondary"
-              >
-                ← Previous
-              </button>
-              <span className="page-info">
-                Page {page} of {totalPages}
-              </span>
-              <button
-                onClick={() => setPage(page + 1)}
-                disabled={page === totalPages}
-                className="btn-secondary"
-              >
-                Next →
-              </button>
-            </div>
-          )}
-        </>
-      )}
-    </div>
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-4 mt-6">
+                <Button
+                  onClick={() => setPage(page - 1)}
+                  disabled={page === 1}
+                  variant="outline"
+                >
+                  ← Previous
+                </Button>
+                <span className="text-sm text-muted-foreground font-medium">
+                  Page {page} of {totalPages}
+                </span>
+                <Button
+                  onClick={() => setPage(page + 1)}
+                  disabled={page === totalPages}
+                  variant="outline"
+                >
+                  Next →
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 }
