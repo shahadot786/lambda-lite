@@ -243,10 +243,11 @@ Expected response:
 {"status":"ok","timestamp":"2025-12-30T02:00:00.000Z"}
 ```
 
-#### Frontend
+#### Frontend & Analytics
 Open your browser and navigate to:
 ```
-http://localhost:5173
+http://localhost:5173            # Main application
+http://localhost:5173/analytics  # Real-time Stats dashboard
 ```
 
 ### 2. Submit a Test Job
@@ -309,9 +310,10 @@ Expected response (after execution):
 curl http://localhost:3000/api/jobs
 ```
 
-### 5. Monitor with Prometheus (Production Mode Only)
+### 5. Monitor with Analytics & Prometheus
 
-Open http://localhost:9090 to access Prometheus metrics.
+1.  **Dashboard**: Open `http://localhost:5173/analytics` to see the real-time visual dashboard.
+2.  **Raw Metrics**: Open `http://localhost:9090` (Production Mode Only) to access Prometheus metrics directly.
 
 ---
 

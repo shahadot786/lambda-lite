@@ -73,10 +73,10 @@ Lambda-Lite is a **distributed task executor** that allows users to submit JavaS
 
 ### Component Responsibilities
 
-| Component | Purpose | Technology |
+|Component | Purpose | Technology |
 |-----------|---------|------------|
-| **Frontend** | User interface for job submission | React, Vite, Monaco Editor |
-| **Backend** | REST API, job management | Express.js, Mongoose |
+| **Frontend** | User interface for job submission | React, Tailwind CSS v4, shadcn/ui |
+| **Backend** | REST API, job management | Express.js, Mongoose, prom-client |
 | **Worker** | Job processing, code execution | BullMQ, Dockerode |
 | **Sandbox** | Isolated code execution | Docker, Node.js VM |
 | **MongoDB** | Persistent job storage | MongoDB 7 |
@@ -426,11 +426,15 @@ async function executeCode(code, args) {
 
 **Location**: `apps/frontend/`
 
-React-based web UI for submitting jobs and viewing results.
+### Modern Design System
+The UI is built with a **Premium & Adaptive** philosophy:
+- **Tailwind CSS v4**: Leveraging the latest in CSS-in-JS performance and utility-first styling.
+- **shadcn/ui**: High-quality, accessible components for a professional look and feel.
+- **Glassmorphism**: Sophisticated backdrop-blur effects and subtle shadows for a modern aesthetic.
+- **Theme-Awareness**: Optimized for both high-contrast light mode and immersive dark mode.
+- **Responsive Layouts**: Designed to be fully functional from mobile screens (using compact logos like "LL") to large monitors.
 
-### Key Components
-
-#### Code Editor
+#### Code Panels
 Uses Monaco Editor (VS Code's editor) for syntax highlighting:
 
 ```typescript
@@ -474,6 +478,24 @@ function pollJobStatus(jobId: string) {
   }, 1000);
 }
 ```
+
+---
+
+## 📊 Monitoring & Analytics
+
+Lambda-Lite features a dual-layer monitoring approach:
+
+### 1. Prometheus Layer (Raw Data)
+The backend exposes a `/metrics` endpoint using `prom-client`. This tracks:
+- **Throughput**: Jobs submitted vs Jobs completed.
+- **Latency**: Detailed histograms of sandbox execution time.
+- **Saturation**: Current queue size and active worker threads.
+
+### 2. Analytics Dashboard (Visual Layer)
+A dedicated frontend page (`/analytics`) provides a premium visual summary:
+- **KPI Summary**: High-level metrics for total workload, avg. time, and success rates.
+- **Status breakdown**: Visual progress tracking for successful vs failed jobs.
+- **Live Pressure**: Dynamic indicators for BullMQ queue state and active worker saturation.
 
 ---
 

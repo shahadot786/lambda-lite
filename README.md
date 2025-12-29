@@ -29,8 +29,10 @@ A mini AWS Lambda system for learning serverless architecture, distributed proce
 - **Sandboxing**: Docker containers with resource limits (CPU, memory, timeout)
 - **Distributed Processing**: BullMQ-based job queue with horizontal scaling
 - **Real-time Monitoring**: Live job status updates and log streaming
-- **Metrics**: Prometheus integration for performance monitoring
-- **Modern UI**: React frontend with Monaco code editor
+- **Analytics Dashboard**: Comprehensive view of system health, success rates, and queue pressure
+- **Premium UI**: Modern, responsive React frontend built with Tailwind CSS v4 and shadcn/ui
+- **Adaptive Design**: Fully optimized for mobile, tablet, and desktop with theme-aware branding
+- **Metrics**: Native Prometheus integration and built-in visual analytics
 
 ## 🚀 Quick Start
 
@@ -106,6 +108,12 @@ GET /api/jobs/:id
 
 ```bash
 GET /api/jobs/:id/logs
+```
+
+### Get System Analytics
+
+```bash
+GET /api/jobs/analytics
 ```
 
 ### List All Jobs
@@ -225,8 +233,8 @@ docker-compose -f infra/docker-compose.yml up --scale worker=5
 - **Worker**: Node.js, Dockerode, TypeScript
 - **Queue**: Redis, BullMQ
 - **Database**: MongoDB
-- **Monitoring**: Prometheus
-- **Frontend**: React, TypeScript, Monaco Editor, Vite
+- **Monitoring**: Prometheus, prom-client
+- **Frontend**: React, TypeScript, Vite, Tailwind CSS v4, shadcn/ui, Lucide Icons, Monaco Editor
 - **Containerization**: Docker, Docker Compose
 
 ## 🤝 Contributing
