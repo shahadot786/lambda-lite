@@ -100,96 +100,98 @@ export default function JobList() {
   }
 
   return (
-    <Card className="border-border/40 bg-card/50 backdrop-blur-sm shadow-xl shadow-primary/5">
-      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-8">
-        <div className="space-y-1.5">
-          <CardTitle className="text-3xl font-black tracking-tighter">Jobs</CardTitle>
-          <CardDescription className="text-base font-medium">
+    <Card className="border-border/40 bg-card/90 dark:bg-card/50 backdrop-blur-md shadow-2xl shadow-primary/10 dark:shadow-primary/5 mx-auto max-w-full">
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 sm:pb-8">
+        <div className="space-y-1.5 w-full sm:w-auto">
+          <CardTitle className="text-2xl sm:text-3xl font-black tracking-tighter">Jobs</CardTitle>
+          <CardDescription className="text-sm sm:text-base font-medium">
             Manage and monitor your distributed tasks
             {loading && <span className="text-primary animate-pulse ml-2 font-bold inline-block">• Synchronizing...</span>}
           </CardDescription>
         </div>
-        <Link to="/submit">
-          <Button size="lg" className="font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform active:scale-95">
+        <Link to="/submit" className="w-full sm:w-auto">
+          <Button size="lg" className="w-full sm:w-auto font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform active:scale-95">
             + Submit New Job
           </Button>
         </Link>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="px-2 sm:px-6">
         {jobs.length === 0 ? (
-          <div className="text-center py-24 border-2 border-dashed border-border/40 rounded-3xl bg-muted/10">
-            <div className="mb-6 text-4xl">🚀</div>
-            <h3 className="text-xl font-bold mb-2">Ready to fly?</h3>
-            <p className="text-muted-foreground mb-8 max-w-[400px] mx-auto">
+          <div className="text-center py-12 sm:py-24 border-2 border-dashed border-border/40 rounded-3xl bg-muted/10 px-4">
+            <div className="mb-4 sm:mb-6 text-3xl sm:text-4xl">🚀</div>
+            <h3 className="text-lg sm:text-xl font-bold mb-2">Ready to fly?</h3>
+            <p className="text-sm text-muted-foreground mb-6 sm:mb-8 max-w-[400px] mx-auto">
               Your task execution queue is waiting for its first payload. Submit a job to see the engine in action.
             </p>
             <Link to="/submit">
-              <Button size="lg" variant="outline" className="border-primary/20 hover:bg-primary/10">
+              <Button size="lg" variant="outline" className="border-primary/20 hover:bg-primary/10 w-full sm:w-auto">
                 Launch First Job
               </Button>
             </Link>
           </div>
         ) : (
           <div className="rounded-2xl border border-border/40 bg-background overflow-hidden shadow-inner shadow-muted/5">
-            <Table>
-              <TableHeader className="bg-muted/30">
-                <TableRow className="hover:bg-transparent border-b border-border/30">
-                  <TableHead className="py-5 pl-6 font-bold uppercase tracking-wider text-[10px]">Status</TableHead>
-                  <TableHead className="py-5 font-bold uppercase tracking-wider text-[10px]">Job Identity</TableHead>
-                  <TableHead className="py-5 font-bold uppercase tracking-wider text-[10px]">Timeline</TableHead>
-                  <TableHead className="py-5 font-bold uppercase tracking-wider text-[10px]">Runtime</TableHead>
-                  <TableHead className="py-5 pr-6 font-bold uppercase tracking-wider text-[10px]">Execution Result</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {jobs.map((job) => (
-                  <TableRow
-                    key={job.id}
-                    onClick={() => navigate(`/job/${job.id}`)}
-                    className="group cursor-pointer hover:bg-muted/20 transition-all duration-200 border-b border-border/20 last:border-0"
-                  >
-                    <TableCell className="py-5 pl-6">
-                      <Badge variant={getStatusVariant(job.status) as any} className="px-3 py-1 font-bold tracking-tight rounded-lg shadow-sm">
-                        <span className="mr-1.5">{getStatusIcon(job.status)}</span>
-                        {job.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="py-5">
-                      <div className="flex flex-col">
-                        <span className="font-mono text-xs font-bold text-foreground tracking-tighter">
-                          {job.id?.slice(0, 12)}...
-                        </span>
-                        <span className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-0.5 opacity-50">
-                          UUID TAG
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-5 text-sm font-medium">
-                      {formatTime(job.createdAt)}
-                    </TableCell>
-                    <TableCell className="py-5">
-                      {job.executionTime ? (
-                        <span className="font-mono text-xs bg-primary/5 text-primary px-2 py-0.5 rounded-md border border-primary/10 font-bold">
-                          {job.executionTime}ms
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground/30 font-black">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="py-5 pr-6">
-                      <div className="max-w-[240px] truncate text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors italic opacity-70 group-hover:opacity-100 italic">
-                        {job.status === 'COMPLETED' && job.result !== undefined
-                          ? JSON.stringify(job.result).slice(0, 80)
-                          : job.status === 'FAILED'
-                            ? job.error?.slice(0, 80)
-                            : <span className="animate-pulse">Processing stream...</span>}
-                      </div>
-                    </TableCell>
+            <div className="overflow-x-auto custom-scrollbar">
+              <Table className="min-w-[800px] lg:min-w-full">
+                <TableHeader className="bg-muted/30">
+                  <TableRow className="hover:bg-transparent border-b border-border/30">
+                    <TableHead className="py-5 pl-6 font-bold uppercase tracking-wider text-[10px] whitespace-nowrap">Status</TableHead>
+                    <TableHead className="py-5 font-bold uppercase tracking-wider text-[10px] whitespace-nowrap">Job Identity</TableHead>
+                    <TableHead className="py-5 font-bold uppercase tracking-wider text-[10px] whitespace-nowrap">Timeline</TableHead>
+                    <TableHead className="py-5 font-bold uppercase tracking-wider text-[10px] whitespace-nowrap">Runtime</TableHead>
+                    <TableHead className="py-5 pr-6 font-bold uppercase tracking-wider text-[10px] whitespace-nowrap">Execution Result</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {jobs.map((job) => (
+                    <TableRow
+                      key={job.id}
+                      onClick={() => navigate(`/job/${job.id}`)}
+                      className="group cursor-pointer hover:bg-muted/20 transition-all duration-200 border-b border-border/20 last:border-0"
+                    >
+                      <TableCell className="py-5 pl-6">
+                        <Badge variant={getStatusVariant(job.status) as any} className="px-3 py-1 font-bold tracking-tight rounded-lg shadow-sm whitespace-nowrap">
+                          <span className="mr-1.5">{getStatusIcon(job.status)}</span>
+                          {job.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="py-5">
+                        <div className="flex flex-col">
+                          <span className="font-mono text-xs font-bold text-foreground tracking-tighter">
+                            {job.id?.slice(0, 12)}...
+                          </span>
+                          <span className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-0.5 opacity-50">
+                            UUID TAG
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-5 text-sm font-medium whitespace-nowrap">
+                        {formatTime(job.createdAt)}
+                      </TableCell>
+                      <TableCell className="py-5">
+                        {job.executionTime ? (
+                          <span className="font-mono text-xs bg-primary/5 text-primary px-2 py-0.5 rounded-md border border-primary/10 font-bold">
+                            {job.executionTime}ms
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground/30 font-black">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="py-5 pr-6">
+                        <div className="max-w-[240px] truncate text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors italic opacity-70 group-hover:opacity-100">
+                          {job.status === 'COMPLETED' && job.result !== undefined
+                            ? JSON.stringify(job.result).slice(0, 80)
+                            : job.status === 'FAILED'
+                              ? job.error?.slice(0, 80)
+                              : <span className="animate-pulse">Processing stream...</span>}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         )}
 
