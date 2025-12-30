@@ -27,7 +27,7 @@ Lambda-Lite is a **distributed task executor** that allows users to submit JavaS
 - **Secure Code Execution**: User code runs in isolated Docker containers with resource limits
 - **Distributed Processing**: Multiple worker instances can process jobs concurrently
 - **Queue-Based Architecture**: Uses Redis and BullMQ for reliable job queuing
-- **Real-time Monitoring**: Track job status, execution time, and results
+- **Real-time Monitoring**: WebSocket-based status updates and log streaming
 - **Resource Management**: CPU, memory, and timeout limits for each execution
 - **Web Interface**: React-based UI for submitting and monitoring jobs
 
@@ -464,19 +464,15 @@ async function submitJob() {
 }
 ```
 
-#### Status Polling
+#### Real-time Updates (WebSockets)
+The frontend uses `socket.io-client` to listen for real-time updates from the backend:
+
 ```typescript
-function pollJobStatus(jobId: string) {
-  const interval = setInterval(async () => {
-    const response = await axios.get(`/api/jobs/${jobId}`);
-    
-    if (response.data.status !== 'PENDING' && 
-        response.data.status !== 'RUNNING') {
-      clearInterval(interval);
-      setJob(response.data);
-    }
-  }, 1000);
-}
+// apps/frontend/src/services/websocket.ts
+this.socket.on('job:update', (data) => {
+  console.log('Job update received:', data);
+  this.emit('job:update', data);
+});
 ```
 
 ---

@@ -19,7 +19,7 @@ Complete guide for setting up and running the Lambda-Lite distributed task execu
 Before you begin, ensure you have the following installed:
 
 - **Node.js** (v20 or higher)
-- **npm** (v9 or higher)
+- **Yarn** (v1.22+)
 - **Docker** (v24 or higher)
 - **Docker Compose** (v2.20 or higher)
 - **MongoDB** (v7 or higher) - Can run via Docker
@@ -29,7 +29,7 @@ Before you begin, ensure you have the following installed:
 
 ```bash
 node --version    # Should be v20+
-npm --version     # Should be v9+
+yarn --version    # Should be v1.22+
 docker --version  # Should be v24+
 docker compose version  # Should be v2.20+
 ```
@@ -60,19 +60,19 @@ Install dependencies for all services:
 
 ```bash
 # Root directory
-cd /Users/shahadot/Desktop/LocalApps/Monorepos/lambda-lite
+cd lambda-lite
 
 # Install shared package dependencies
-cd shared && npm install && cd ..
+cd shared && yarn install && cd ..
 
 # Install backend dependencies
-cd apps/backend && npm install && cd ../..
+cd apps/backend && yarn install && cd ../..
 
 # Install worker dependencies
-cd apps/worker && npm install && cd ../..
+cd apps/worker && yarn install && cd ../..
 
 # Install frontend dependencies
-cd apps/frontend && npm install && cd ../..
+cd apps/frontend && yarn install && cd ../..
 ```
 
 ### 2. Configure Environment Variables
@@ -174,7 +174,7 @@ Run each service in a separate terminal window:
 #### Terminal 1: Backend API
 ```bash
 cd apps/backend
-npm run dev
+yarn dev
 ```
 
 Expected output:
@@ -187,7 +187,7 @@ Connected to Redis
 #### Terminal 2: Worker Service
 ```bash
 cd apps/worker
-npm run dev
+yarn dev
 ```
 
 Expected output:
@@ -201,7 +201,7 @@ Listening for jobs on queue: jobs
 #### Terminal 3: Frontend UI
 ```bash
 cd apps/frontend
-npm run dev
+yarn dev
 ```
 
 Expected output:
@@ -451,13 +451,13 @@ curl http://localhost:8000/api/jobs
 cd infra && docker compose up -d mongodb redis
 
 # Terminal 2: Backend
-cd apps/backend && npm run dev
+cd apps/backend && yarn dev
 
 # Terminal 3: Worker
-cd apps/worker && npm run dev
+cd apps/worker && yarn dev
 
 # Terminal 4: Frontend
-cd apps/frontend && npm run dev
+cd apps/frontend && yarn dev
 ```
 
 ### Stop Everything

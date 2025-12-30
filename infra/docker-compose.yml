@@ -61,6 +61,7 @@ services:
       MONGODB_URI: mongodb://mongodb:27017/lambda-lite
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      BACKEND_URL: http://backend:8000
       SANDBOX_IMAGE: lambda-lite-sandbox:latest
     depends_on:
       - mongodb
@@ -94,7 +95,7 @@ services:
     ports:
       - "5173:80"
     environment:
-      VITE_API_URL: http://localhost:8000
+      VITE_API_URL: /api
     depends_on:
       - backend
     networks:

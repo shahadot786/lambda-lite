@@ -49,7 +49,7 @@ git clone <repository-url>
 cd lambda-lite
 
 # Build and start all services
-docker-compose -f infra/docker-compose.yml up --build
+docker compose -f infra/docker-compose.yml up --build
 
 # Access the application
 # Frontend: http://localhost:5173
@@ -63,24 +63,24 @@ docker-compose -f infra/docker-compose.yml up --build
 
 ```bash
 cd apps/backend
-npm install
-npm run dev
+yarn install
+yarn dev
 ```
 
 #### Worker
 
 ```bash
 cd apps/worker
-npm install
-npm run dev
+yarn install
+yarn dev
 ```
 
 #### Frontend
 
 ```bash
 cd apps/frontend
-npm install
-npm run dev
+yarn install
+yarn dev
 ```
 
 ## 📝 API Documentation
@@ -224,7 +224,7 @@ lambda-lite/
 Scale workers horizontally:
 
 ```bash
-docker-compose -f infra/docker-compose.yml up --scale worker=5
+docker compose -f infra/docker-compose.yml up --scale worker=5
 ```
 
 ## 📚 Tech Stack
@@ -256,7 +256,7 @@ This project demonstrates:
 1. **Distributed Systems**: Job queue, worker pool, horizontal scaling
 2. **Sandboxing**: Secure code execution in isolated environments
 3. **Microservices**: Backend, worker, and frontend as separate services
-4. **Real-time Updates**: Polling-based status updates
+4. **Real-time Updates**: WebSocket-based status and log streaming
 5. **Monitoring**: Prometheus metrics and observability
 6. **Docker**: Multi-stage builds, Docker-in-Docker, resource limits
 7. **Full-stack Development**: React frontend + Node.js backend
@@ -275,7 +275,7 @@ volumes:
 
 Check worker logs:
 ```bash
-docker-compose -f infra/docker-compose.yml logs worker
+docker compose -f infra/docker-compose.yml logs worker
 ```
 
 ### Frontend can't reach backend
