@@ -5,6 +5,7 @@ import JobStatus from './pages/JobStatus';
 import Analytics from './pages/Analytics';
 import { ThemeProvider } from './components/theme-provider';
 import { ThemeToggle } from './components/theme-toggle';
+import { LogoIcon } from './components/Logo';
 
 function Navigation() {
   const location = useLocation();
@@ -51,8 +52,8 @@ function App() {
             <div className="container mx-auto flex h-16 items-center justify-between gap-4">
               <div className="flex items-center gap-4 sm:gap-10">
                 <Link to="/" className="flex items-center space-x-2 transition-all hover:opacity-90 active:scale-95 shrink-0 text-foreground">
-                  <span className="text-xl sm:text-2xl font-black tracking-tighter flex items-center gap-1">
-                    <span className="text-primary italic">⚡</span>
+                  <LogoIcon size={32} />
+                  <span className="text-xl sm:text-2xl font-black tracking-tighter">
                     <span className="hidden md:inline">LAMBDA<span className="text-primary">LITE</span></span>
                     <span className="md:hidden">LL</span>
                   </span>
