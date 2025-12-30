@@ -4,16 +4,16 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY apps/frontend/package*.json apps/frontend/yarn.lock* ./
 
 # Install dependencies
-RUN npm ci
+RUN yarn install
 
 # Copy source code
-COPY . .
+COPY apps/frontend .
 
 # Build app
-RUN npm run build
+RUN yarn build
 
 # Production stage
 FROM nginx:alpine
@@ -22,7 +22,7 @@ FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Copy nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY apps/frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
