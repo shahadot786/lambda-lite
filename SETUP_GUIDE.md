@@ -443,6 +443,30 @@ curl http://localhost:8000/api/jobs
 
 ---
 
+## 🏗️ Daily Development Workflow (Every Time)
+
+If you are writing code and running services manually with `yarn dev`, you **must** ensure the databases are running in the background.
+
+### 1. Start Infrastructure
+```bash
+cd infra && docker compose up -d mongodb redis
+```
+
+### 2. Run Services
+Open three terminal tabs and run:
+- **Backend**: `cd apps/backend && yarn dev`
+- **Worker**: `cd apps/worker && yarn dev`
+- **Frontend**: `cd apps/frontend && yarn dev`
+
+### 3. Verification
+Check if the services are connected:
+```bash
+# Check if MongoDB/Redis containers are alive
+docker compose -f infra/docker-compose.yml ps
+```
+
+---
+
 ## Quick Start Commands
 
 ### Start Everything (Development)

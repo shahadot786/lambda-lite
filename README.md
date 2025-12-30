@@ -57,7 +57,16 @@ docker compose -f infra/docker-compose.yml up --build
 # Prometheus: http://localhost:9090
 ```
 
-### Local Development
+### Local Development (Hybrid Mode)
+
+For development, it's recommended to run **Databases in Docker** and **Code locally**.
+
+```bash
+# 1. Start only the databases
+cd infra && docker compose up -d mongodb redis
+
+# 2. Run your app (see below)
+```
 
 #### Backend
 
