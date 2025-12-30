@@ -84,7 +84,7 @@ export class JobService {
    */
   static async getJobs(page: number = 1, limit: number = 20) {
     const skip = (page - 1) * limit;
-    
+
     const [jobs, total] = await Promise.all([
       Job.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
       Job.countDocuments(),

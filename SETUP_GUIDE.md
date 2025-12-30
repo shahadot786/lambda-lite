@@ -19,7 +19,7 @@ Complete guide for setting up and running the Lambda-Lite distributed task execu
 Before you begin, ensure you have the following installed:
 
 - **Node.js** (v20 or higher)
-- **npm** (v9 or higher)
+- **Yarn** (v1.22+)
 - **Docker** (v24 or higher)
 - **Docker Compose** (v2.20 or higher)
 - **MongoDB** (v7 or higher) - Can run via Docker
@@ -29,7 +29,7 @@ Before you begin, ensure you have the following installed:
 
 ```bash
 node --version    # Should be v20+
-npm --version     # Should be v9+
+yarn --version    # Should be v1.22+
 docker --version  # Should be v24+
 docker compose version  # Should be v2.20+
 ```
@@ -60,19 +60,19 @@ Install dependencies for all services:
 
 ```bash
 # Root directory
-cd /Users/shahadot/Desktop/LocalApps/Monorepos/lambda-lite
+cd lambda-lite
 
 # Install shared package dependencies
-cd shared && npm install && cd ..
+cd shared && yarn install && cd ..
 
 # Install backend dependencies
-cd apps/backend && npm install && cd ../..
+cd apps/backend && yarn install && cd ../..
 
 # Install worker dependencies
-cd apps/worker && npm install && cd ../..
+cd apps/worker && yarn install && cd ../..
 
 # Install frontend dependencies
-cd apps/frontend && npm install && cd ../..
+cd apps/frontend && yarn install && cd ../..
 ```
 
 ### 2. Configure Environment Variables
@@ -83,7 +83,7 @@ Create `.env` files for each service:
 ```bash
 # apps/backend/.env
 NODE_ENV=development
-PORT=3000
+PORT=8000
 MONGODB_URI=mongodb://localhost:27017/lambda-lite
 REDIS_HOST=localhost
 REDIS_PORT=6379
@@ -102,7 +102,7 @@ SANDBOX_IMAGE=lambda-lite-sandbox:latest
 #### Frontend (.env)
 ```bash
 # apps/frontend/.env
-VITE_API_URL=http://localhost:3000
+VITE_API_URL=http://localhost:8000
 ```
 
 ---
@@ -174,12 +174,12 @@ Run each service in a separate terminal window:
 #### Terminal 1: Backend API
 ```bash
 cd apps/backend
-npm run dev
+yarn dev
 ```
 
 Expected output:
 ```
-Server running on port 3000
+Server running on port 8000
 Connected to MongoDB
 Connected to Redis
 ```
@@ -187,7 +187,7 @@ Connected to Redis
 #### Terminal 2: Worker Service
 ```bash
 cd apps/worker
-npm run dev
+yarn dev
 ```
 
 Expected output:
@@ -201,7 +201,7 @@ Listening for jobs on queue: jobs
 #### Terminal 3: Frontend UI
 ```bash
 cd apps/frontend
-npm run dev
+yarn dev
 ```
 
 Expected output:
@@ -222,7 +222,7 @@ docker compose up --build
 This will start:
 - MongoDB (port 27017)
 - Redis (port 6379)
-- Backend API (port 3000)
+- Backend API (port 8000)
 - Worker Service (2 replicas)
 - Frontend UI (port 5173)
 - Prometheus (port 9090)
@@ -235,7 +235,7 @@ This will start:
 
 #### Backend API
 ```bash
-curl http://localhost:3000/api/health
+curl http://localhost:8000/api/health
 ```
 
 Expected response:
@@ -254,7 +254,7 @@ http://localhost:5173/analytics  # Real-time Stats dashboard
 
 #### Using cURL
 ```bash
-curl -X POST http://localhost:3000/api/jobs \
+curl -X POST http://localhost:8000/api/jobs \
   -H "Content-Type: application/json" \
   -d '{
     "code": "function main(a, b) { console.log(\"Adding\", a, \"and\", b); return a + b; }",
@@ -285,7 +285,7 @@ Expected response:
 Get the job ID from the submission response, then:
 
 ```bash
-curl http://localhost:3000/api/jobs/<job-id>
+curl http://localhost:8000/api/jobs/<job-id>
 ```
 
 Expected response (after execution):
@@ -307,7 +307,7 @@ Expected response (after execution):
 ### 4. List All Jobs
 
 ```bash
-curl http://localhost:3000/api/jobs
+curl http://localhost:8000/api/jobs
 ```
 
 ### 5. Monitor with Analytics & Prometheus
@@ -390,16 +390,16 @@ curl http://localhost:3000/api/jobs
 **Symptoms**: Network errors in browser console
 
 **Solutions**:
-1. **Verify backend is running** on port 3000:
+1. **Verify backend is running** on port 8000:
    ```bash
-   curl http://localhost:3000/api/health
+   curl http://localhost:8000/api/health
    ```
 
 2. **Check CORS settings** in `apps/backend/src/server.ts`
 
 3. **Verify VITE_API_URL** in `apps/frontend/.env`:
    ```bash
-   VITE_API_URL=http://localhost:3000
+   VITE_API_URL=http://localhost:8000
    ```
 
 ### Issue: Worker Not Processing Jobs
@@ -443,6 +443,30 @@ curl http://localhost:3000/api/jobs
 
 ---
 
+## 🏗️ Daily Development Workflow (Every Time)
+
+If you are writing code and running services manually with `yarn dev`, you **must** ensure the databases are running in the background.
+
+### 1. Start Infrastructure
+```bash
+cd infra && docker compose up -d mongodb redis
+```
+
+### 2. Run Services
+Open three terminal tabs and run:
+- **Backend**: `cd apps/backend && yarn dev`
+- **Worker**: `cd apps/worker && yarn dev`
+- **Frontend**: `cd apps/frontend && yarn dev`
+
+### 3. Verification
+Check if the services are connected:
+```bash
+# Check if MongoDB/Redis containers are alive
+docker compose -f infra/docker-compose.yml ps
+```
+
+---
+
 ## Quick Start Commands
 
 ### Start Everything (Development)
@@ -451,13 +475,13 @@ curl http://localhost:3000/api/jobs
 cd infra && docker compose up -d mongodb redis
 
 # Terminal 2: Backend
-cd apps/backend && npm run dev
+cd apps/backend && yarn dev
 
 # Terminal 3: Worker
-cd apps/worker && npm run dev
+cd apps/worker && yarn dev
 
 # Terminal 4: Frontend
-cd apps/frontend && npm run dev
+cd apps/frontend && yarn dev
 ```
 
 ### Stop Everything
@@ -489,7 +513,7 @@ cd infra && docker compose up -d mongodb redis
 ## Next Steps
 
 - Read the [Learning Guide](./LEARNING_GUIDE.md) to understand the system architecture
-- Explore the API documentation at http://localhost:3000/api/docs (if implemented)
+- Explore the API documentation at http://localhost:8000/api/docs (if implemented)
 - Check out example code snippets in the frontend
 - Monitor system metrics with Prometheus
 

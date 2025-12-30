@@ -15,6 +15,12 @@ export function initializeWebSocket(httpServer: HTTPServer) {
   io.on('connection', (socket) => {
     console.log('WebSocket client connected:', socket.id);
 
+    // Listen for job updates from workers and broadcast to all clients
+    socket.on('job:update:worker', (data) => {
+      console.log('Received job update from worker:', data.jobId, data.status);
+      io!.emit('job:update', data);
+    });
+
     socket.on('disconnect', () => {
       console.log('WebSocket client disconnected:', socket.id);
     });

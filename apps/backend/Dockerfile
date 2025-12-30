@@ -3,35 +3,46 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-COPY tsconfig.json ./
+# Copy shared package
+COPY shared /shared
+WORKDIR /shared
+COPY shared/package*.json shared/yarn.lock* ./
+RUN yarn install
+
+# Copy backend package files
+WORKDIR /app
+COPY apps/backend/package*.json apps/backend/yarn.lock* ./
+COPY apps/backend/tsconfig.json ./
 
 # Install dependencies
-RUN npm ci
+RUN yarn install
 
-# Copy source code
-COPY . .
+# Copy backend source code
+COPY apps/backend .
 
 # Build TypeScript
-RUN npm run build
+RUN yarn build
+
+# Prune dev dependencies
+RUN yarn install --production --ignore-scripts --prefer-offline
 
 # Production stage
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy shared package from builder
+COPY --from=builder /shared /shared
 
-# Install production dependencies only
-RUN npm ci --only=production
+# Copy package files and node_modules from builder
+COPY apps/backend/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
 
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
 
 # Expose port
-EXPOSE 3000
+EXPOSE 8000
 
 # Start server
 CMD ["node", "dist/server.js"]

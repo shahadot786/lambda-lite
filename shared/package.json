@@ -2,8 +2,8 @@
   "name": "@lambda-lite/shared",
   "version": "1.0.0",
   "description": "Shared types for lambda-lite",
-  "main": "index.ts",
-  "types": "index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.js",
   "scripts": {
     "build": "tsc"
   },
