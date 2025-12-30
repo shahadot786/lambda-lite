@@ -53,7 +53,7 @@ docker-compose -f infra/docker-compose.yml up --build
 
 # Access the application
 # Frontend: http://localhost:5173
-# Backend API: http://localhost:3000
+# Backend API: http://localhost:8000
 # Prometheus: http://localhost:9090
 ```
 
@@ -128,7 +128,7 @@ GET /api/jobs?page=1&limit=20
 
 #### Backend
 
-- `PORT`: Server port (default: 3000)
+- `PORT`: Server port (default: 8000)
 - `MONGODB_URI`: MongoDB connection string
 - `REDIS_HOST`: Redis host
 - `REDIS_PORT`: Redis port

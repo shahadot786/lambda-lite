@@ -51,7 +51,7 @@ Lambda-Lite is a **distributed task executor** that allows users to submit JavaS
        ▼
 ┌─────────────┐
 │   Backend   │  (Express.js)
-│  Port 3000  │
+│  Port 8000  │
 └──────┬──────┘
        │
        ├─────► MongoDB (Job Storage)

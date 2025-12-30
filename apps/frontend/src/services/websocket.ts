@@ -5,8 +5,8 @@ class WebSocketService {
   private listeners: Map<string, Set<Function>> = new Map();
 
   connect() {
-    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3000';
-    
+    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000';
+
     this.socket = io(backendUrl, {
       reconnection: true,
       reconnectionDelay: 1000,

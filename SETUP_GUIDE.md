@@ -83,7 +83,7 @@ Create `.env` files for each service:
 ```bash
 # apps/backend/.env
 NODE_ENV=development
-PORT=3000
+PORT=8000
 MONGODB_URI=mongodb://localhost:27017/lambda-lite
 REDIS_HOST=localhost
 REDIS_PORT=6379
@@ -102,7 +102,7 @@ SANDBOX_IMAGE=lambda-lite-sandbox:latest
 #### Frontend (.env)
 ```bash
 # apps/frontend/.env
-VITE_API_URL=http://localhost:3000
+VITE_API_URL=http://localhost:8000
 ```
 
 ---
@@ -179,7 +179,7 @@ npm run dev
 
 Expected output:
 ```
-Server running on port 3000
+Server running on port 8000
 Connected to MongoDB
 Connected to Redis
 ```
@@ -222,7 +222,7 @@ docker compose up --build
 This will start:
 - MongoDB (port 27017)
 - Redis (port 6379)
-- Backend API (port 3000)
+- Backend API (port 8000)
 - Worker Service (2 replicas)
 - Frontend UI (port 5173)
 - Prometheus (port 9090)
@@ -235,7 +235,7 @@ This will start:
 
 #### Backend API
 ```bash
-curl http://localhost:3000/api/health
+curl http://localhost:8000/api/health
 ```
 
 Expected response:
@@ -254,7 +254,7 @@ http://localhost:5173/analytics  # Real-time Stats dashboard
 
 #### Using cURL
 ```bash
-curl -X POST http://localhost:3000/api/jobs \
+curl -X POST http://localhost:8000/api/jobs \
   -H "Content-Type: application/json" \
   -d '{
     "code": "function main(a, b) { console.log(\"Adding\", a, \"and\", b); return a + b; }",
@@ -285,7 +285,7 @@ Expected response:
 Get the job ID from the submission response, then:
 
 ```bash
-curl http://localhost:3000/api/jobs/<job-id>
+curl http://localhost:8000/api/jobs/<job-id>
 ```
 
 Expected response (after execution):
@@ -307,7 +307,7 @@ Expected response (after execution):
 ### 4. List All Jobs
 
 ```bash
-curl http://localhost:3000/api/jobs
+curl http://localhost:8000/api/jobs
 ```
 
 ### 5. Monitor with Analytics & Prometheus
@@ -390,16 +390,16 @@ curl http://localhost:3000/api/jobs
 **Symptoms**: Network errors in browser console
 
 **Solutions**:
-1. **Verify backend is running** on port 3000:
+1. **Verify backend is running** on port 8000:
    ```bash
-   curl http://localhost:3000/api/health
+   curl http://localhost:8000/api/health
    ```
 
 2. **Check CORS settings** in `apps/backend/src/server.ts`
 
 3. **Verify VITE_API_URL** in `apps/frontend/.env`:
    ```bash
-   VITE_API_URL=http://localhost:3000
+   VITE_API_URL=http://localhost:8000
    ```
 
 ### Issue: Worker Not Processing Jobs
@@ -489,7 +489,7 @@ cd infra && docker compose up -d mongodb redis
 ## Next Steps
 
 - Read the [Learning Guide](./LEARNING_GUIDE.md) to understand the system architecture
-- Explore the API documentation at http://localhost:3000/api/docs (if implemented)
+- Explore the API documentation at http://localhost:8000/api/docs (if implemented)
 - Check out example code snippets in the frontend
 - Monitor system metrics with Prometheus
 
