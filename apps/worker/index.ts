@@ -6,7 +6,7 @@ import { connectToBackend } from './src/websocket/client';
 
 dotenv.config();
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/lambda-lite';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27018/lambda-lite';
 
 async function startWorker() {
   try {

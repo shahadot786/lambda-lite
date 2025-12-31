@@ -84,7 +84,7 @@ Create `.env` files for each service:
 # apps/backend/.env
 NODE_ENV=development
 PORT=8000
-MONGODB_URI=mongodb://localhost:27017/lambda-lite
+MONGODB_URI=mongodb://localhost:27018/lambda-lite
 REDIS_HOST=localhost
 REDIS_PORT=6379
 ```
@@ -93,7 +93,7 @@ REDIS_PORT=6379
 ```bash
 # apps/worker/.env
 NODE_ENV=development
-MONGODB_URI=mongodb://localhost:27017/lambda-lite
+MONGODB_URI=mongodb://localhost:27018/lambda-lite
 REDIS_HOST=localhost
 REDIS_PORT=6379
 SANDBOX_IMAGE=lambda-lite-sandbox:latest
@@ -220,7 +220,7 @@ docker compose up --build
 ```
 
 This will start:
-- MongoDB (port 27017)
+- MongoDB (port 27018)
 - Redis (port 6379)
 - Backend API (port 8000)
 - Worker Service (2 replicas)
