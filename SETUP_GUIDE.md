@@ -225,7 +225,7 @@ This will start:
 - Backend API (port 8000)
 - Worker Service (2 replicas)
 - Frontend UI (port 5173)
-- Prometheus (port 9090)
+- Prometheus (port 9098)
 
 ---
 
@@ -313,7 +313,7 @@ curl http://localhost:8000/api/jobs
 ### 5. Monitor with Analytics & Prometheus
 
 1.  **Dashboard**: Open `http://localhost:5173/analytics` to see the real-time visual dashboard.
-2.  **Raw Metrics**: Open `http://localhost:9090` (Production Mode Only) to access Prometheus metrics directly.
+2.  **Raw Metrics**: Prometheus (Internal Only). External port mapping is disabled to avoid host environment conflicts. Access is still available within the Docker network for the Backend API.
 
 ---
 
